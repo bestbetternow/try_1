@@ -1,6 +1,6 @@
 # 📦 **Inventory App JS**
 
-[![CI](https://github.com/bestbetternow/try_1/actions/workflows/main.yml/badge.svg)](https://github.com/bestbetternow/try_1/actions/.github/workflows/main.yml)
+[![CI](https://github.com/bestbetternow/try_1/actions/workflows/main.yml/badge.svg)](https://github.com/bestbetternow/try_1/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/bestbetternow/try_1/branch/main/graph/badge.svg)](https://codecov.io/gh/bestbetternow/try_1)
 
 **A sleek and efficient inventory management application powered by JavaScript.**
