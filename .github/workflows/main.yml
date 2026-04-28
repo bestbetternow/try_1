@@ -1,0 +1,72 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Continuous Integration for Inventory-App-JS
+# CPT304 Coursework 1 — Minimum Baseline Standard #2 (Test Coverage + Codecov)
+#
+# Runs on every push / PR to main:
+#   1. Check out the repository
+#   2. Install Node 20 with npm cache
+#   3. Install locked dependencies via `npm ci`
+#   4. Execute Jest with Istanbul coverage (lcov + text report)
+#   5. Verify the production bundle builds (webpack)
+#   6. Upload coverage to Codecov so the README badge stays in sync
+#
+# Required GitHub repository secret:
+#   CODECOV_TOKEN  — generated at https://app.codecov.io/gh/bestbetternow/Project
+# ─────────────────────────────────────────────────────────────────────────────
+
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+# Cancel an in-progress run if a newer commit is pushed to the same branch.
+# Saves CI minutes and avoids racing badge updates on Codecov.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Principle of least privilege: this workflow only needs read access.
+# Codecov uploads use the repository secret, not GITHUB_TOKEN.
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies (locked)
+        run: npm ci
+
+      - name: Run Jest with coverage
+        # Generates ./coverage/lcov.info for Codecov + a text summary in logs.
+        # `coverageThreshold` in package.json fails the build below 80 %.
+        run: npm run test:coverage
+
+      - name: Verify production bundle builds
+        # Catches breakage that only surfaces in webpack production mode
+        # (e.g. dynamic-import paths, dead-code elimination side-effects).
+        run: npm run build
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          flags: unittests
+          name: codecov-inventory-app
+          fail_ci_if_error: false
+          token: ${{ secrets.CODECOV_TOKEN }}
